@@ -53,6 +53,8 @@ app.post('/shopping-list', jsonParser, (req, res) => {
 // of that, log error and send back status code 400. otherwise
 // call `ShoppingList.update` with updated item.
 app.put('/shopping-list/:id', jsonParser, (req, res) => {
+
+  // check if all required fields exist
   const requiredFields = ['name', 'budget', 'id'];
   for (let i=0; i<requiredFields.length; i++) {
     const field = requiredFields[i];
@@ -62,6 +64,8 @@ app.put('/shopping-list/:id', jsonParser, (req, res) => {
       return res.status(400).send(message);
     }
   }
+
+  // check if id from route params matches id from request body
   if (req.params.id !== req.body.id) {
     const message = (
       `Request path id (${req.params.id}) and request body id `
@@ -110,6 +114,43 @@ app.delete('/recipes/:id', (req, res) => {
   Recipes.delete(req.params.id);
   console.log(`Deleted recipe \`${req.params.ID}\``);
   res.status(204).end();
+});
+
+app.put('/recipes/:id', jsonParser, (req, res) => {
+
+  // check if required fields exist
+  const requiredFields = ['id', 'name', 'ingredients'];
+  requiredFields.forEach((field) => {
+    if (!req.body[field]) {
+      const message = `Missing \`${field}\` in request body`
+      console.error(message);
+      return res.status(400).send(message);
+    }
+  });
+
+  // check if id from route param matches id from req.body
+  if (req.params.id !== req.body.id) {
+    const message = (
+      `Request path id (${req.params.id}) and request body id (${req.body.id}) must match`
+    );
+    console.error(message);
+    return res.status(400).send(message);
+  }
+
+  const newItem = {
+    id: req.params.id,
+    name: req.body.name,
+    ingredients: req.body.ingredients
+  };
+
+  try {
+    const item = Recipes.update(newItem);
+  }
+  catch(error) {
+    res.status(400).send(error.message);
+  }
+
+  res.status(200).json(item);
 });
 
 app.listen(process.env.PORT || 8080, () => {

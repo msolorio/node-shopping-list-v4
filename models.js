@@ -73,12 +73,15 @@ const Recipes = {
     delete this.items[itemId];
   },
   update: function(updatedItem) {
-    console.log(`Updating recipe with id \`${updatedItem.id}\``);
+
     const {id} = updatedItem;
-    if (!(id in this.items)) {
-      throw StorageException(
-        `Can't update item \`${id}\` because doesn't exist.`)
+
+    if (!this.items[id]) {
+      throw new Error(
+        `Can't update item \`${id}\` because ID doesn't exist.`)
     }
+
+    console.log(`Updating recipe with id \`${updatedItem.id}\``);
     this.items[updatedItem.id] = updatedItem;
     return updatedItem;
   }
